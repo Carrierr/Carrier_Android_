@@ -1,6 +1,7 @@
 package me.tiptap.tiptap.preview
 
 import android.app.Dialog
+import android.content.Intent
 import android.databinding.DataBindingUtil
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -23,6 +24,7 @@ import me.tiptap.tiptap.common.util.preview.PreviewDialogNavigator
 import me.tiptap.tiptap.data.Diary
 import me.tiptap.tiptap.data.InvalidDiary
 import me.tiptap.tiptap.databinding.FragmentDialogPreviewBinding
+import me.tiptap.tiptap.diarywriting.DiaryWritingActivity
 
 class PreviewDialogFragment: DialogFragment() {
 
@@ -105,8 +107,8 @@ class PreviewDialogFragment: DialogFragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean =
             when (item.itemId) {
                 R.id.menu_preview_edit -> {
-//                    rxBus.takeBus(data) //send be edited Diary.
-//                    startActivity(Intent(activity, DiaryWritingActivity::class.java))
+                    rxBus.takeBus(Pair(binding.idx , data)) //send be edited Diary.
+                    startActivity(Intent(activity, DiaryWritingActivity::class.java))
                     dialog.dismiss()
                     true
                 }

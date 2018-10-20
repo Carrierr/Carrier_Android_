@@ -19,13 +19,11 @@ import android.util.Log
 import android.widget.ImageView
 import com.bumptech.glide.request.RequestOptions
 import com.google.android.gms.location.places.Place
-import com.google.gson.JsonObject
 import com.taskail.googleplacessearchdialog.SimplePlacesSearchDialog
 import com.taskail.googleplacessearchdialog.SimplePlacesSearchDialogBuilder
 import gun0912.tedbottompicker.TedBottomPicker
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 import me.tiptap.tiptap.R
 import me.tiptap.tiptap.TipTapApplication
@@ -152,11 +150,12 @@ class DiaryWritingActivity : AppCompatActivity() {
         rxBus
                 .toObservable()
                 .subscribe {
-                    if (it is Diary) {
-                        diary = it
-                        binding.diary = it
-                    } else if (it is Int) {
-                        binding.toolbarWriteTitle.text = getString(R.string.post_count, (it+1).toString())
+                    if (it is Pair<*, *>) { //수정
+                        diary = it.second as Diary
+                        binding.diary = diary
+                        binding.toolbarWriteTitle.text = getString(R.string.post_count, it.first.toString())
+                    } else if (it is Int) { //등록
+                        binding.toolbarWriteTitle.text = getString(R.string.post_count, (it + 1).toString())
                     }
                 }.dispose()
     }
@@ -332,25 +331,15 @@ class DiaryWritingActivity : AppCompatActivity() {
 
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribeOn(Schedulers.io())
-                        .subscribeWith(object : DisposableObserver<JsonObject>() {
-                            override fun onNext(t: JsonObject) {
-                                t.apply {
-                                    if (get(getString(R.string.code)).asString != "1000") { //if not successful.
-                                        Log.d(getString(R.string.desc),
-                                                getAsJsonObject(getString(R.string.data)).get(getString(R.string.desc)).asString)
-                                    }
+                        .doOnComplete { finish() }
+                        .doOnError { e -> e.printStackTrace() }
+                        .subscribe { t ->
+                            t.apply {
+                                if (get(getString(R.string.code)).asString != "1000") { //if not successful.
+                                    Log.d(getString(R.string.desc), getAsJsonObject(getString(R.string.data)).get(getString(R.string.desc)).asString)
                                 }
                             }
-
-                            override fun onComplete() {
-                                //call startActivity is allocated a lot of memories.
-                                finish()
-                            }
-
-                            override fun onError(e: Throwable) {
-                                e.printStackTrace()
-                            }
-                        }))
+                        })
     }
 
 
@@ -367,25 +356,16 @@ class DiaryWritingActivity : AppCompatActivity() {
 
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribeOn(Schedulers.io())
-                        .subscribeWith(object : DisposableObserver<JsonObject>() {
-                            override fun onNext(t: JsonObject) {
-                                t.apply {
-                                    if (get(getString(R.string.code)).asString != "1000") { //if not successful.
-                                        Log.d(getString(R.string.desc),
-                                                getAsJsonObject(getString(R.string.data)).get(getString(R.string.desc)).asString)
-                                    }
+                        .doOnComplete { finish() }
+                        .doOnError { e -> e.printStackTrace() }
+                        .subscribe { t ->
+                            t.apply {
+                                if (get(getString(R.string.code)).asString != "1000") { //if not successful.
+                                    Log.d(getString(R.string.desc), getAsJsonObject(getString(R.string.data)).get(getString(R.string.desc)).asString)
                                 }
                             }
-
-                            override fun onComplete() {
-                                //call startActivity is allocated a lot of memories.
-                                finish()
-                            }
-
-                            override fun onError(e: Throwable) {
-                                e.printStackTrace()
-                            }
-                        }))
+                        }
+        )
     }
 
 

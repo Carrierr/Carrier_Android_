@@ -82,8 +82,8 @@ interface DiaryApi {
             @Part("content") content: RequestBody,
             @Part("location") location: RequestBody,
             @Part("latitude") latitude: RequestBody,
-            @Part("id") id: RequestBody,
             @Part("longitude") longitude: RequestBody,
+            @Part("id") id: RequestBody,
             @Part diaryFile: MultipartBody.Part?)
             : Observable<JsonObject>
 

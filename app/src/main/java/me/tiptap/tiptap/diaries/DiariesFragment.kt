@@ -41,6 +41,7 @@ class DiariesFragment : Fragment() {
 
     val isBotDialogVisible = ObservableBoolean(false)
     val isDateRangeAvailable = ObservableBoolean(false)
+    val isDiaryExist = ObservableBoolean(false)
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -84,7 +85,6 @@ class DiariesFragment : Fragment() {
     }
 
     private fun initRecyclerViewEvent() {
-        Log.d("Today", "init recyclerview event")
         adapter.apply {
             disposables.addAll(
                     clickSubject.subscribe {
@@ -138,6 +138,8 @@ class DiariesFragment : Fragment() {
                                 val list = t.data.list
 
                                 if (list.isNotEmpty()) {
+                                    isDiaryExist.set(true)
+
                                     for (monthDiary in list.iterator()) {
                                         if (monthDiary.diariesOfDay != null) {
                                             adapter.updateItems(monthDiary.diariesOfDay) //update items
@@ -150,7 +152,6 @@ class DiariesFragment : Fragment() {
     }
 
     private fun getDiaries(page: Int, limit: Int, isDataNotAdded: Boolean) {
-        Log.d("Today", "getDiaries")
         disposables.add(
                 service.getDiaries(TipTapApplication.getAccessToken(), page, limit) //한번에 하나의 달만 불러올거.
                         .observeOn(AndroidSchedulers.mainThread())
@@ -163,6 +164,8 @@ class DiariesFragment : Fragment() {
                                     val list = t.data.list
 
                                     if (list.isNotEmpty()) {
+                                        isDiaryExist.set(true)
+
                                         for (monthDiary in list.iterator()) {
                                             if (monthDiary.diariesOfDay != null)
                                                 if (!isDataNotAdded && adapter.itemCount != 0) { //금일에 추가된 일기가 있고, 한번 리스트를 로드한 적이 있다면,
@@ -191,7 +194,7 @@ class DiariesFragment : Fragment() {
     fun onDateFindButtonClick() {
         adapter.changeDeleteModeState(false)
 
-        startActivity(Intent(this@DiariesFragment.activity, CalendarActivity::class.java))
+        if (!isDiaryExist.get()) return else startActivity(Intent(this@DiariesFragment.activity, CalendarActivity::class.java))
     }
 
 
@@ -240,6 +243,7 @@ class DiariesFragment : Fragment() {
                 service.deleteDiaryByDay(TipTapApplication.getAccessToken(), invalidDiaries)
                         .subscribeOn(Schedulers.io())
                         .doOnError { e -> e.printStackTrace() }
+                        .doOnComplete { if (adapter.itemCount == 0) isDiaryExist.set(false) }
                         .subscribe { t ->
                             t.apply {
                                 if (get(getString(R.string.code)).asString != "1000") { //if not successful.
@@ -254,8 +258,13 @@ class DiariesFragment : Fragment() {
 
         if (isVisibleToUser) {
             if (!isDateRangeAvailable.get()) {
+                if (disposables.size() == 0) {
+                    initRecyclerViewEvent()
+                }
+
                 checkBus()
             }
+
         } else {
             resetAllMode()
             disposables.clear()

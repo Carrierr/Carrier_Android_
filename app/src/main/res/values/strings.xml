@@ -67,6 +67,7 @@
     <string name = "ellipsize">\.\.\.</string>
     <string name = "count_diary_tiptap">%d TIPTAP</string>
     <string name = "last_year_month">%s` %s</string>
+    <string name = "hint_no_diary">아직 작성한 일기가 없네요.</string>
     
     <!--calendar-->
     <string name = "date_start">시작일</string>

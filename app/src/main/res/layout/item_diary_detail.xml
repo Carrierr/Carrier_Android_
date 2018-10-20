@@ -151,7 +151,7 @@
                 app:layout_constraintEnd_toEndOf = "parent"
                 app:layout_constraintStart_toStartOf = "parent"
                 app:layout_constraintTop_toTopOf = "parent"
-                app:layout_constraintVertical_bias = "0.92"
+                app:layout_constraintVertical_bias = "0.968"
                 tools:text = "키오스크 망원동 카페"
                 />
         
